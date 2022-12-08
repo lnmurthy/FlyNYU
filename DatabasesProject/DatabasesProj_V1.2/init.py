@@ -469,7 +469,7 @@ def customerFlightAuth():
 		current_date = get_format_date()
 		cursor = conn.cursor()	
 		
-		query = 'SELECT f.flight_num, f.dept_airport, f.arr_airport, f.dept_date, f.arr_date FROM flight as f, manage WHERE (f.dept_date = %s OR f.dept_date >= %s) and f.dept_date >= %s and f.dept_airport = (SELECT name_airport FROM airport WHERE city = %s or name_airport = %s) and f.arr_airport = (SELECT name_airport FROM airport WHERE city = %s or name_airport=%s) and manage.flight_num = f.flight_num and (manage.max_seats > manage.total_seats)'
+		query = 'SELECT m.max_seats, m.total_seats, f.flight_num, f.dept_airport, f.arr_airport, f.dept_date, f.arr_date FROM flight as f, manage as m WHERE (f.dept_date = %s OR f.dept_date >= %s) and f.dept_date >= %s and f.dept_airport = (SELECT name_airport FROM airport WHERE city = %s or name_airport = %s) and f.arr_airport = (SELECT name_airport FROM airport WHERE city = %s or name_airport=%s) and m.flight_num = f.flight_num and ((m.max_seats - m.total_seats) > 0)'
 		cursor.execute(query, (
 			deptdate,
 			deptdate,
@@ -607,7 +607,7 @@ def viewReports():
 		cursor.execute(query, airline[0]['airline_name'])
 		data = cursor.fetchall()
 		cursor.close()
-		labels = [(str(line['m']) + '/'+ str(line['y'])) for line in data]
+		labels = [ 'Flight #' + str(line['flight_num']) + ': ' + (str(line['m']) + '/'+ str(line['y'])) for line in data]
 		values = [int(line['total']) for line in data]
 		values.append(0)		
 
@@ -629,7 +629,7 @@ def searchReports():
 		))
 		data = cursor.fetchall()
 		cursor.close()
-		labels = [(str(line['m']) + '/'+ str(line['y'])) for line in data]
+		labels = ['Flight #' + str(line['flight_num']) + ': ' + (str(line['m']) + '/'+ str(line['y'])) for line in data]
 		values = [int(line['total']) for line in data]
 		values.append(0)		
 
@@ -834,9 +834,10 @@ def viewPreviousFlightsAuth():
 	
 	#print(air_data[0][])
 	if (air_data):
+		error= None
 		air_name = air_data[0]['airline_name']
 		cursor = conn.cursor()
-		query = 'SELECT distinct flight_num FROM manage as m WHERE m.airline_name = %s'
+		query = 'SELECT distinct m.flight_num FROM manage as m, buys as b WHERE m.airline_name = %s and m.flight_num = b.flight_num and b.ratings IS NOT NULL and b.comments is NOT NULL'
 		#query = 'SELECT distinct b.flight_num, avg(b.ratings) as avg_rating, b.comments FROM buys as b, manage as m WHERE m.airline_name = %s and m.flight_num = b.flight_num GROUP BY b.flight_num ,b.comments'
 		cursor.execute(query, (air_name))
 		data = cursor.fetchall()
@@ -856,9 +857,11 @@ def viewPreviousFlightsAuth2():
 		air_name = air_data[0]['airline_name']
 		flight_num = request.form['flight_num']
 		cursor = conn.cursor()
-		query = 'SELECT distinct b.flight_num, b.ratings, b.comments FROM buys as b, manage as m WHERE m.airline_name = %s and m.flight_num = b.flight_num and b.flight_num = %s'
+		query = 'SELECT distinct b.flight_num, b.ratings, b.comments FROM buys as b, manage as m WHERE m.airline_name = %s and m.flight_num = b.flight_num and b.flight_num = %s and (b.ratings IS NOT NULL and b.comments IS NOT NULL)'
 		cursor.execute(query, (air_name, flight_num))
 		data = cursor.fetchall()
+		print('DATA: ', data)
+		
 		values = [int(line['ratings']) for line in data]  
 		sumvalues = sum(values)
 		count_values = len(values)
@@ -866,8 +869,10 @@ def viewPreviousFlightsAuth2():
 			average = "No Average Rating"
 		else:
 			average = sumvalues/count_values
+		
 		cursor.close()
 		return render_template('FlightStats.html', flight = data, airline_name = air_name, average = average, flight_num = flight_num)
+	
 
 	return redirect('/login/staff')
 
