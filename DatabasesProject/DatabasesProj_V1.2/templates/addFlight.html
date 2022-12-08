@@ -17,7 +17,11 @@
         <th> base price </th>
         <input type="decimal(8,2)" name = "baseprice" placeholder="Base Price" required/> </br>
         <th> Airplane ID </th>
-        <input type="varchar(50)" name = "idairplane" placeholder="Airplane ID" required/> </br>
+        <select name="idairplane">
+            {% for line in airplane %}
+            <option value={{line['id_airplane']}}> {{line['id_airplane']}}</option>
+            {% endfor %}
+        </select> </br>
         <th> Departure Airport </th>
         <input type="varchar(50)" name = "deptairport" placeholder="Departure Airport" required/> </br>
         <th> stats</th>

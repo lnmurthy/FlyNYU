@@ -365,8 +365,13 @@ def staffViewSpecificFlgiht():
 
 @app.route('/addFlight', methods=['GET', 'POST'])
 def CreateNewFlights():
-	if (staff_check_session):
-		return render_template('addFlight.html')
+	airline = staff_check_session()
+	if (airline):
+		cursor = conn.cursor()
+		query = 'SELECT id_airplane FROM airplane WHERE airline_name = %s'
+		cursor.execute(query, airline[0]['airline_name'])
+		data = cursor.fetchall()
+		return render_template('addFlight.html', airplane = data)
 	return redirect('/login/staff')
 
 
