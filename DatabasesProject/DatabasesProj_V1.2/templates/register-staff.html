@@ -17,14 +17,14 @@
 	<input type="text" name = "email" placeholder="email" required/> </br>
 	<th> Password</th>
     <input type="password" name = "password" placeholder="password" required/></br>
-    <th> AIRLINE </th>
+	<th> AIRLINE </th>
+	<select name="airline" required>
+		{% for line in airline %}
+		<option value={{line['airline_name']}}> {{line['airline_name']}}</option>
+		{% endfor %}
+	</select> </br>
 
-    <select name="airline" id="airline" required>
-      <option value="Delta">Delta</option>
-      <option value="JetBlue">JetBlue</option>
-      <option value="Spirit">Spirit</option>
-      <option value="Qatar Airways">Qatar Airways</option>
-    </select></br>
+    
 	<th> Date of Birth</th>
 	<input type="date" name = "dob" placeholder="dob" required/> </br>
 

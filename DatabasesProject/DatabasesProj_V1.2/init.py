@@ -46,7 +46,12 @@ def register_customer():
 
 @app.route('/register/staff')
 def register_staff():
-	return render_template('register-staff.html')
+	cursor = conn.cursor()
+	query = 'SELECT airline_name FROM airline'
+	cursor.execute(query)
+	data = cursor.fetchall()
+	cursor.close()
+	return render_template('register-staff.html', airline=data)
 
 #Authenticates the login
 @app.route('/loginAuth', methods=['GET', 'POST'])
@@ -285,6 +290,29 @@ def customerViewmyFlights():
 		cursor.close()
 		return render_template('cus-view-flight.html',data=data)
 	return redirect('/login/customer')
+
+
+@app.route('/searchFlights', methods=['GET', 'POST'])
+def flightSearch():
+	deptairport = request.form['deptairport']
+	arrairport = request.form['arrairport']
+	deptdate = request.form['deptdate']
+	current_date = get_format_date()
+	cursor = conn.cursor()	
+		
+	query = 'SELECT  f.stats,f.flight_num, f.dept_airport, f.arr_airport, f.dept_date, f.arr_date FROM flight as f, manage as m WHERE (f.dept_date = %s OR f.dept_date >= %s) and f.dept_date >= %s and f.dept_airport = (SELECT name_airport FROM airport WHERE city = %s or name_airport = %s) and f.arr_airport = (SELECT name_airport FROM airport WHERE city = %s or name_airport=%s) and m.flight_num = f.flight_num and ((m.max_seats - m.total_seats) > 0)'
+	cursor.execute(query, (
+		deptdate,
+		deptdate,
+		current_date,
+		deptairport,
+		deptairport,
+		arrairport,
+		arrairport
+	))
+	flight = cursor.fetchall()
+	cursor.close()
+	return render_template('flights.html', flight=flight)
 
 
 @app.route('/cusCancelFlight', methods=['GET', 'POST'])
