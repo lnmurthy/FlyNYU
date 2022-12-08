@@ -46,7 +46,12 @@ def register_customer():
 
 @app.route('/register/staff')
 def register_staff():
-	return render_template('register-staff.html')
+	cursor = conn.cursor()
+	query = 'SELECT airline_name FROM airline'
+	cursor.execute(query)
+	data = cursor.fetchall()
+	cursor.close()
+	return render_template('register-staff.html', airline=data)
 
 #Authenticates the login
 @app.route('/loginAuth', methods=['GET', 'POST'])
@@ -287,6 +292,29 @@ def customerViewmyFlights():
 	return redirect('/login/customer')
 
 
+@app.route('/searchFlights', methods=['GET', 'POST'])
+def flightSearch():
+	deptairport = request.form['deptairport']
+	arrairport = request.form['arrairport']
+	deptdate = request.form['deptdate']
+	current_date = get_format_date()
+	cursor = conn.cursor()	
+		
+	query = 'SELECT  f.stats,f.flight_num, f.dept_airport, f.arr_airport, f.dept_date, f.arr_date FROM flight as f, manage as m WHERE (f.dept_date = %s OR f.dept_date >= %s) and f.dept_date >= %s and f.dept_airport = (SELECT name_airport FROM airport WHERE city = %s or name_airport = %s) and f.arr_airport = (SELECT name_airport FROM airport WHERE city = %s or name_airport=%s) and m.flight_num = f.flight_num and ((m.max_seats - m.total_seats) > 0)'
+	cursor.execute(query, (
+		deptdate,
+		deptdate,
+		current_date,
+		deptairport,
+		deptairport,
+		arrairport,
+		arrairport
+	))
+	flight = cursor.fetchall()
+	cursor.close()
+	return render_template('flights.html', flight=flight)
+
+
 @app.route('/cusCancelFlight', methods=['GET', 'POST'])
 def cusCancelFlight():
 	currentdate = get_date()  
@@ -375,8 +403,17 @@ def staffViewSpecificFlgiht():
 
 @app.route('/addFlight', methods=['GET', 'POST'])
 def CreateNewFlights():
-	if (staff_check_session):
-		return render_template('addFlight.html')
+	airline = staff_check_session()
+	if (airline):
+		cursor = conn.cursor()
+		query = 'SELECT id_airplane FROM airplane WHERE airline_name = %s'
+		airport = 'SELECT name_airport FROM airport'
+		cursor.execute(query, airline[0]['airline_name'])
+		data = cursor.fetchall()
+		cursor.execute(airport)
+		air = cursor.fetchall()
+		cursor.close()
+		return render_template('addFlight.html', airplane = data, airport = air)
 	return redirect('/login/staff')
 
 
@@ -396,6 +433,13 @@ def CreateNewFlighAtuth():
 		deptairport = request.form['deptairport']
 		states = request.form['states']
 		cursor = conn.cursor()
+		check = 'SELECT * FROM flight WHERE flight_num = %s'
+		cursor.execute(check, flightnum)
+		if (cursor.fetchall()):
+			error = 'Flight Number Already in use'
+			cursor.close()
+			return render_template('staff-errorpage.html', error=error)
+
 		ins = 'INSERT INTO flight(`dept_date`, `dept_time`, `flight_num`, `arr_time`,`arr_airport`, `arr_date`, `base_price`, `id_airplane`, `dept_airport`, `stats`) VALUES( %s, %s, %s, %s,%s, %s,%s, %s,%s, %s)'
 		cursor.execute(ins, (
 			deptdate, 
@@ -479,7 +523,7 @@ def customerFlightAuth():
 		current_date = get_format_date()
 		cursor = conn.cursor()	
 		
-		query = 'SELECT f.flight_num, f.dept_airport, f.arr_airport, f.dept_date, f.arr_date FROM flight as f, manage WHERE (f.dept_date = %s OR f.dept_date >= %s) and f.dept_date >= %s and f.dept_airport = (SELECT name_airport FROM airport WHERE city = %s or name_airport = %s) and f.arr_airport = (SELECT name_airport FROM airport WHERE city = %s or name_airport=%s) and manage.flight_num = f.flight_num and (manage.max_seats > manage.total_seats)'
+		query = 'SELECT m.max_seats, m.total_seats, f.flight_num, f.dept_airport, f.arr_airport, f.dept_date, f.arr_date FROM flight as f, manage as m WHERE (f.dept_date = %s OR f.dept_date >= %s) and f.dept_date >= %s and f.dept_airport = (SELECT name_airport FROM airport WHERE city = %s or name_airport = %s) and f.arr_airport = (SELECT name_airport FROM airport WHERE city = %s or name_airport=%s) and m.flight_num = f.flight_num and ((m.max_seats - m.total_seats) > 0)'
 		cursor.execute(query, (
 			deptdate,
 			deptdate,
@@ -617,7 +661,7 @@ def viewReports():
 		cursor.execute(query, airline[0]['airline_name'])
 		data = cursor.fetchall()
 		cursor.close()
-		labels = [(str(line['m']) + '/'+ str(line['y'])) for line in data]
+		labels = [ 'Flight #' + str(line['flight_num']) + ': ' + (str(line['m']) + '/'+ str(line['y'])) for line in data]
 		values = [int(line['total']) for line in data]
 		values.append(0)		
 
@@ -639,7 +683,7 @@ def searchReports():
 		))
 		data = cursor.fetchall()
 		cursor.close()
-		labels = [(str(line['m']) + '/'+ str(line['y'])) for line in data]
+		labels = ['Flight #' + str(line['flight_num']) + ': ' + (str(line['m']) + '/'+ str(line['y'])) for line in data]
 		values = [int(line['total']) for line in data]
 		values.append(0)		
 
@@ -844,9 +888,10 @@ def viewPreviousFlightsAuth():
 	
 	#print(air_data[0][])
 	if (air_data):
+		error= None
 		air_name = air_data[0]['airline_name']
 		cursor = conn.cursor()
-		query = 'SELECT distinct flight_num FROM manage as m WHERE m.airline_name = %s'
+		query = 'SELECT distinct m.flight_num FROM manage as m, buys as b WHERE m.airline_name = %s and m.flight_num = b.flight_num and b.ratings IS NOT NULL and b.comments is NOT NULL'
 		#query = 'SELECT distinct b.flight_num, avg(b.ratings) as avg_rating, b.comments FROM buys as b, manage as m WHERE m.airline_name = %s and m.flight_num = b.flight_num GROUP BY b.flight_num ,b.comments'
 		cursor.execute(query, (air_name))
 		data = cursor.fetchall()
@@ -866,9 +911,11 @@ def viewPreviousFlightsAuth2():
 		air_name = air_data[0]['airline_name']
 		flight_num = request.form['flight_num']
 		cursor = conn.cursor()
-		query = 'SELECT distinct b.flight_num, b.ratings, b.comments FROM buys as b, manage as m WHERE m.airline_name = %s and m.flight_num = b.flight_num and b.flight_num = %s'
+		query = 'SELECT distinct b.flight_num, b.ratings, b.comments FROM buys as b, manage as m WHERE m.airline_name = %s and m.flight_num = b.flight_num and b.flight_num = %s and (b.ratings IS NOT NULL and b.comments IS NOT NULL)'
 		cursor.execute(query, (air_name, flight_num))
 		data = cursor.fetchall()
+		print('DATA: ', data)
+		
 		values = [int(line['ratings']) for line in data]  
 		sumvalues = sum(values)
 		count_values = len(values)
@@ -876,8 +923,10 @@ def viewPreviousFlightsAuth2():
 			average = "No Average Rating"
 		else:
 			average = sumvalues/count_values
+		
 		cursor.close()
 		return render_template('FlightStats.html', flight = data, airline_name = air_name, average = average, flight_num = flight_num)
+	
 
 	return redirect('/login/staff')
 
