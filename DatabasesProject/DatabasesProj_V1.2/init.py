@@ -369,9 +369,13 @@ def CreateNewFlights():
 	if (airline):
 		cursor = conn.cursor()
 		query = 'SELECT id_airplane FROM airplane WHERE airline_name = %s'
+		airport = 'SELECT name_airport FROM airport'
 		cursor.execute(query, airline[0]['airline_name'])
 		data = cursor.fetchall()
-		return render_template('addFlight.html', airplane = data)
+		cursor.execute(airport)
+		air = cursor.fetchall()
+		cursor.close()
+		return render_template('addFlight.html', airplane = data, airport = air)
 	return redirect('/login/staff')
 
 
@@ -391,6 +395,13 @@ def CreateNewFlighAtuth():
 		deptairport = request.form['deptairport']
 		states = request.form['states']
 		cursor = conn.cursor()
+		check = 'SELECT * FROM flight WHERE flight_num = %s'
+		cursor.execute(check, flightnum)
+		if (cursor.fetchall()):
+			error = 'Flight Number Already in use'
+			cursor.close()
+			return render_template('staff-errorpage.html', error=error)
+
 		ins = 'INSERT INTO flight(`dept_date`, `dept_time`, `flight_num`, `arr_time`,`arr_airport`, `arr_date`, `base_price`, `id_airplane`, `dept_airport`, `stats`) VALUES( %s, %s, %s, %s,%s, %s,%s, %s,%s, %s)'
 		cursor.execute(ins, (
 			deptdate, 
