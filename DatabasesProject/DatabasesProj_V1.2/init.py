@@ -289,6 +289,7 @@ def customerViewmyFlights():
 
 @app.route('/cusCancelFlight', methods=['GET', 'POST'])
 def cusCancelFlight():
+	currentdate = get_date()  
 	customer = cus_check_session()
 	if customer:
 		flightnum = request.form['flight_num']
@@ -300,34 +301,43 @@ def cusCancelFlight():
 		))
 		data = cur.fetchall()
 		ticketid = data[0]['ticket_id']
-
-		delete = 'DELETE FROM buys WHERE ticket_id = %s and dept_date = %s and dept_time = %s'
-		cur.execute(delete, (
-			ticketid,
-			data[0]['dept_date'],
-			data[0]['dept_time']
-		))
-
-		del_ticket = 'DELETE FROM ticket WHERE ID = %s and dept_date = %s and dept_time = %s and flight_num = %s' 
-		cur.execute(del_ticket, (
-			ticketid,
-			data[0]['dept_date'],
-			data[0]['dept_time'],
-			flightnum
-
-		))
-		month= data[0]['dept_date'].month
-		day = data[0]['dept_date'].day
-		year = data[0]['dept_date'].year
-		currentDate = get_format_date().strip('-')
-
-		seat = 'UPDATE `manage` SET `total_seats`= total_seats - 1 WHERE total_seats >=1'
-		cur.execute(seat)
-		conn.commit()
-		cur.close()
-		return redirect('/customer/view/myflights')
-	return redirect('/login/customer')
-
+		deptdate = data[0]['dept_date'] 
+		depttime = data[0]['dept_time']
+		year = deptdate.year
+		month = deptdate.month
+		day = deptdate.day 
+		strtime = str(depttime)  
+		mylist = strtime.split(':')  
+		hour = int(mylist[0])
+		minute = int(mylist[1])
+		d1 = datetime(year,month,day,hour,minute,0) 
+		d2 = datetime.strptime(currentdate, "%d/%m/%Y %H:%M:%S") 
+		delta = d1-d2 
+		seconds = delta.total_seconds()
+		hours = seconds // 3600
+		error = None 
+#ERR MSGS PRINT IN TERMINAL BUT NOT ON PAGE
+		if hours < 24:  
+			error =  'You cannot cancel your flight' 
+			print(error)
+			return render_template('cus-view-flight.html',error = error)   
+		else: 
+			success = 'your flight has been cancelled'
+			cursor = conn.cursor()
+			query = 'DELETE FROM buys WHERE ticket_id = %s and dept_date = %s and dept_time = %s'
+			cursor.execute(query, (ticketid,deptdate,depttime))  
+			print(success)
+			conn.commit() 
+			return render_template('cus-view-flight.html',error = error,data=success)  
+		return redirect('/login/customer')   
+#UPDATE OF SEATS NOT WORKING - COME BACK
+		if success: 
+			seat = 'UPDATE `manage` SET `total_seats`= total_seats - 1 WHERE total_seats >=1'
+			cur.execute(seat)
+			conn.commit()
+			cur.close() 
+			print('the seat has been removed')
+			return render_template('cus-view-flight.html',data=success)
 
 
 @app.route('/staff/searchflights/date', methods=['GET', 'POST'])
