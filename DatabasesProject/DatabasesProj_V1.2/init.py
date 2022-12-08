@@ -287,6 +287,48 @@ def customerViewmyFlights():
 	return redirect('/login/customer')
 
 
+@app.route('/cusCancelFlight', methods=['GET', 'POST'])
+def cusCancelFlight():
+	customer = cus_check_session()
+	if customer:
+		flightnum = request.form['flight_num']
+		cur = conn.cursor()
+		query = 'SELECT ticket_id, dept_date, dept_time FROM buys WHERE flight_num = %s and email = %s'
+		cur.execute(query, (
+			flightnum,
+			customer[0]['email']
+		))
+		data = cur.fetchall()
+		ticketid = data[0]['ticket_id']
+
+		delete = 'DELETE FROM buys WHERE ticket_id = %s and dept_date = %s and dept_time = %s'
+		cur.execute(delete, (
+			ticketid,
+			data[0]['dept_date'],
+			data[0]['dept_time']
+		))
+
+		del_ticket = 'DELETE FROM ticket WHERE ID = %s and dept_date = %s and dept_time = %s and flight_num = %s' 
+		cur.execute(del_ticket, (
+			ticketid,
+			data[0]['dept_date'],
+			data[0]['dept_time'],
+			flightnum
+
+		))
+		month= data[0]['dept_date'].month
+		day = data[0]['dept_date'].day
+		year = data[0]['dept_date'].year
+		currentDate = get_format_date().strip('-')
+
+		seat = 'UPDATE `manage` SET `total_seats`= total_seats - 1 WHERE total_seats >=1'
+		cur.execute(seat)
+		conn.commit()
+		cur.close()
+		return redirect('/customer/view/myflights')
+	return redirect('/login/customer')
+
+
 
 @app.route('/staff/searchflights/date', methods=['GET', 'POST'])
 def staffSearchFlights():
