@@ -6,14 +6,6 @@
     <title>Customer View Flight</title>
 </head>
 <body>
-    <form action="/cusCancelFlight" method="post">
-
-        {% if error %}
-            <p class="error"><strong>Error:</strong> {{error}}</p>
-        {% endif %} 
-        {% if success %}
-        <p class="success"><strong>Error:</strong> {{success}}</p>
-        {% endif %}
 
     <h1> Viewing Flights</h1>
     <table>
@@ -35,12 +27,25 @@
 		<td>{{line['stats']}}</td>
 
 		<td> 
+            <form action="/cusCancelFlight" method="post">
+                <div class="search">
+                    <button class = btn name = "flight_num" value={{line['flight_num']}}> Cancel </button> </a>
+                </div> 
+
+
             </form>
 		</td>
     </tr>
+        {% endfor %}
     </table>
     
 </body>
+<body>
+    {% if msg %}
+    <p class="error"><strong>Message:</strong> {{msg}}</p>
+    {% endif %} 
+</body>
+
 <body>
     <a href="/customer/home"> Go Back</a>
 </body>

@@ -278,9 +278,8 @@ def customerFlight():
 	return render_template('flights.html')
 
 
-
 @app.route('/customer/view/myflights')
-def customerViewmyFlights():
+def customerViewmyFlights(msg=None):
 	customer = cus_check_session()
 	if customer:
 		cursor = conn.cursor()
@@ -288,7 +287,7 @@ def customerViewmyFlights():
 		cursor.execute(query, (customer[0]['email']))
 		data = cursor.fetchall()
 		cursor.close()
-		return render_template('cus-view-flight.html',data=data)
+		return render_template('cus-view-flight.html',data=data,msg=msg)
 	return redirect('/login/customer')
 
 
@@ -348,26 +347,21 @@ def cusCancelFlight():
 		if hours < 24:  
 			error =  'You cannot cancel your flight' 
 			print(error)
-			return render_template('cus-view-flight.html',error = error)   
+			return customerViewmyFlights(error)
 		else: 
-			success = 'your flight has been cancelled'
+			success = 'your flight has been cancelled' 
+			cancel = True 
 			cursor = conn.cursor()
 			query = 'DELETE FROM buys WHERE ticket_id = %s and dept_date = %s and dept_time = %s'
 			cursor.execute(query, (ticketid,deptdate,depttime))  
 			print(success)
-			conn.commit() 
-			return render_template('cus-view-flight.html',error = error,data=success)  
-		return redirect('/login/customer')   
-#UPDATE OF SEATS NOT WORKING - COME BACK
-		if success: 
-			seat = 'UPDATE `manage` SET `total_seats`= total_seats - 1 WHERE total_seats >=1'
-			cur.execute(seat)
+			seat = 'UPDATE `manage` SET `total_seats`= total_seats - 1 WHERE total_seats > 0'
+			cursor.execute(seat)
 			conn.commit()
 			cur.close() 
 			print('the seat has been removed')
-			return render_template('cus-view-flight.html',data=success)
-
-
+			return customerViewmyFlights(success)
+		return redirect('/login/customer')   
 @app.route('/staff/searchflights/date', methods=['GET', 'POST'])
 def staffSearchFlights():
 	air_data = staff_check_session()
