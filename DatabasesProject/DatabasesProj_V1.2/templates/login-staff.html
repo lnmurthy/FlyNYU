@@ -1,0 +1,31 @@
+<html>
+<head>
+	<h1>Airline Staff Login</h1>
+</head>
+<body>
+<form action="/loginAuthStaff" method="POST">
+	<input type="text" name = "username" placeholder="username" required/> </br>
+	<input type="password" name = "password" placeholder="password" required/></br>
+	<input type="submit" value = Login />
+	{% if error %}
+		<p class="error"><strong>Error:</strong> {{error}}</p>
+	{% endif %}
+</form>
+
+<a href="/">Go back</a>
+
+
+<table>
+	<th>Staff Email</th>
+	<th>Staff Password</th>
+	{% for line in air_staff %}
+	<tr>
+		<td>{{line['email']}}</td>
+		<td>{{line['pass_word']}}</td> 
+	</tr>
+	{% endfor %}
+</table> 
+</body>
+
+
+</html>

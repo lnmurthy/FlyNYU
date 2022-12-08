@@ -1,0 +1,83 @@
+<html>
+
+<h1> Reports </h1>
+
+<h1></h1>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+<canvas id="myChart" width="800" height="400"></canvas>
+    <script>
+        var ctx = document.getElementById("myChart").getContext("2d");
+        new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: {{labels| safe}},
+                
+                datasets: [
+                {
+                    label: "Tickets Sold",
+                    data: {{values| safe}},
+                    fill: false,
+                    borderColor: "rgb(0,0,0)",
+                    lineTension: 0.05,
+                    backgroundColor: "rgb(0,255,0)",
+                   
+                    
+                    
+                }
+            ]
+            },
+            options:{
+                responsive: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                    }
+                }
+                
+            }
+        });
+
+    </script>
+    
+   
+
+</body>
+<body>
+    <form action = "/staff/reports/search"method="POST">
+        <th>From Start date</th>
+        <input type="date" name="startDate" placeholder="YYYY-MM-DD"/> </br>
+        <th>To End date</th>
+        <input type="date" name="endDate" placeholder="YYYY-MM-DD" /> </br>
+        <div class = "search"> 
+            <button class = btn> Search </button> </a>  
+        </div>    
+    </form> 
+</body>
+
+
+<body>
+    <table>
+        <th> Month-Year</th>
+        <th>Flight Number</th>
+        <th>Ticket Solds</th>
+        
+        
+    {% for line in data %}
+        <tr>
+            <td> {{line['m']}}-{{line['y']}}</td>
+            <td>{{line['flight_num']}}</td>
+            <td>{{line['total']}}</td>
+            
+             
+        
+    
+        </tr>
+    {% endfor %}
+    </table>
+</body>
+<h1></h1>
+
+<h1></h1>
+<a href="/staff/home"> Go Back</a>
+</html>

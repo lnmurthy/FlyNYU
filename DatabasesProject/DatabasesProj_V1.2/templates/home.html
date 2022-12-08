@@ -1,0 +1,38 @@
+<html>
+<head>
+</head>
+<body>
+<form action="/post" method="POST">
+	<h1>Welcome {{user}}</h1>
+	<input type="text" name = "blog" placeholder="post" required/> </br>
+	<input type="submit" value = Post />
+</form>
+<a href="/login">Login</a>
+<a href="/register/customer">Register Customer</a>
+<a href="/register/staff"> Register Airline Staff</a>
+<a href="/flights">See Flights</a> 
+
+<style type="text/css">
+	table, th, td{
+		border: 1px solid black;
+	}
+</style>
+
+<table>
+	<th>Time</th>
+	<th>Post</th>
+
+{% for line in posts %}
+	<tr>
+		<td>{{line['ts']}}</td>
+		<td>{{line['blog_post']}}</td>
+	</tr>
+{% endfor %}
+</table>
+
+<a href="/logout">Logout</a>
+
+</body>
+
+
+</html>

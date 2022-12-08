@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer View Flight</title>
+</head>
+<body>
+
+    <h1> Viewing Flights</h1>
+    <table>
+        <th>Flight Number</th>
+        <th>Departure Airport</th>
+	    <th>Destination City</th>
+	    <th>Departure Date</th>
+	    <th>Return Date</th>
+	    <th>ID Airplane </th>
+	    <th>Flight Status</th>
+        {% for line in data %}
+	<tr>
+        <td>{{line['flight_num']}}</td>
+		<td>{{line['dept_airport']}}</td>
+		<td>{{line['arr_airport']}}</td> 
+		<td>{{line['dept_date']}}</td>
+		<td>{{line['arr_date']}}</td>
+		<td>{{line['id_airplane']}}</td>
+		<td>{{line['stats']}}</td>
+		
+		<td> 
+            <form action="/cusCancelFlight" method="post">
+                <div class="search">
+                    <button class = btn name = "flight_num" value={{line['flight_num']}}> Cancel </button> </a>
+                </div>
+            </form>
+		</td>
+    </tr>
+	{% endfor %}
+    </table>
+    
+</body>
+<body>
+    <a href="/customer/home"> Go Back</a>
+</body>
+</html>

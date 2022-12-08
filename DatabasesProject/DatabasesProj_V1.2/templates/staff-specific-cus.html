@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Specific Customer</title>
+</head>
+<body>
+    <h1> Showing {{details[0]['name']}} Flights</h1>
+    <table>
+        <th> Flight Number</th>
+        <th> Deptature Date</th>
+        <th> Arrival Date</th>
+        <th> Deptature Airport</th>
+        <th> Arrival Airport </th>
+        <th> Airplane ID </th>
+
+        {% for line in details %}
+	<tr>
+        <td>{{line['flight_num']}}</td>
+        <td> {{line['dept_date']}}</td>
+        <td>{{line['arr_date']}}</td>
+        <td> {{line['dept_airport']}}</td>
+        <td>{{line['arr_airport']}}</td>
+        <td> {{line['id_airplane']}}</td>
+        
+
+    </tr>
+	{% endfor %}
+    </table>
+</body>
+<body>
+    <a href="/staff/view/customers"> Go Back </a>
+</body>
+</html>

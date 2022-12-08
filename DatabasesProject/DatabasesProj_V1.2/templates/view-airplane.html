@@ -1,0 +1,21 @@
+<html>
+  <h1></h1> 
+  <table> 
+	<th>Airplane ID</th>
+    <th>Number of Seats</th>
+	<th>Manufacturing Company</th>
+	<th>Age</th>
+	  {% for line in data%}
+	<tr>
+		<td>{{line['id_airplane']}}</td>
+		<td>{{line['num_of_seats']}}</td>
+        <td>{{line['manufacturing_company']}}</td> 
+        <td>{{line['age']}}</td> 
+	
+    </tr>
+	{% endfor %}
+	
+  </table>
+  <a href="/addAirplane"> Add New Plane</a>
+  <a href="/staff/home"> Go back</a> 
+</html>

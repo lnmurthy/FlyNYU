@@ -1,0 +1,45 @@
+<html>
+  <h1> Viewing {{airline_name[0]['airline_name']}} Flights</h1>
+  <h1></h1>
+  <form action = "/staff/searchflights/date"method="POST">
+	
+	<th>Depature date</th>
+	<input type="date" name="deptdate" placeholder="YYYY-MM-DD"/> </br>
+	<th>Return date</th>
+	<input type="date" name="arrdate" placeholder="YYYY-MM-DD" /> </br>
+    <div class = "search"> 
+        <button class = btn> Search </button> </a>  
+    </div>    
+</form> 
+  <table> 
+	<th>Flight Number</th>
+    <th>Departure Airport</th>
+	<th>Destination City</th>
+	<th>Departure Date</th>
+	<th>Return Date</th>
+	<th>ID Airplane </th>
+	<th>Flight Status</th>
+	<th> Passenger Information</th>
+    {% for line in flight %}
+	<tr>
+		<td>{{line['flight_num']}}</td>
+		<td>{{line['dept_airport']}}</td>
+		<td>{{line['arr_airport']}}</td> 
+		<td>{{line['dept_date']}}</td>
+		<td>{{line['arr_date']}}</td>
+		<td>{{line['id_airplane']}}</td>
+		<td>{{line['stats']}}</td>
+		<td> 
+            <form action="/staff/searchFlight/view" method="post">
+                <div class="search">
+                    <button class = btn name = "flight_num" value={{line['flight_num']}}> view </button> </a>
+                </div>
+            </form>
+		</td>
+
+    </tr>
+	{% endfor %}
+	
+  </table>
+  <a href="/staff/home"> Go back</a> 
+</html>

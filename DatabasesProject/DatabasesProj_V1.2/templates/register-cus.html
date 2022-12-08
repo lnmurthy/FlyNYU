@@ -1,0 +1,40 @@
+<html>
+<head>
+</head>
+<body>
+<form action="/registerAuth/customer" method="POST">
+	<th> CUSTOMER REGISTRATION</th> </br>
+	<th> Name</th>
+	<input type="text" name="name" placeholder="name" required/> </br>
+	<th> Phone Number</th>
+	<input type="text" name="phoneNum" placeholder="phoneNu," required/> </br>
+	<th> Email</th>
+	<input type="text" name = "email" placeholder="email" required/> </br>
+	<th> Password</th>
+	<input type="password" name = "password" placeholder="password" required/></br>
+	<th> Building Number</th>
+	<input type="text" name = "buildingNum" placeholder="buildingNum" required/> </br>
+	<th> Street Name</th>
+	<input type="text" name = "street" placeholder="street" required/> </br>
+	<th> City </th>
+	<input type="text" name = "city" placeholder="city" required/> </br>
+	<th> State (Abbrivation i.e NY, FL, CA, etc)</th>
+	<input type="text" name = "state" placeholder="state" required/> </br>
+	<th> Passport Number</th>
+	<input type="text" name = "passportNumber" placeholder="passport Number" required/> </br>
+	<th> Passport Country</th>
+	<input type="text" name = "passportCountry" placeholder="passport Country" required/> </br>
+	<th> Passporty Expire Date</th>
+	<input type="date" name = "passportExp" placeholder="PassportExp" required/> </br>
+	<th> Date of Birth</th>
+	<input type="date" name = "dob" placeholder="dob" required/> </br>
+
+
+	<input type="submit" value = Register />
+	{% if error %}
+		<p class="error"><strong>Error:</strong> {{error}}</p>
+	{% endif %}
+</form>
+<a href="/">Go back</a>
+</body>
+</html>

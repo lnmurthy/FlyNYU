@@ -1,0 +1,32 @@
+<html>
+    <body>
+    <form action = "/customer/addReview"method="POST">
+        <th> Previous Flights</th>
+        <select name="ticket_id">
+            {% for line in data %}
+            <option value={{line['ticket_id']}}> {{line['flight_num']}} on {{line['dept_date']}}</option>
+            {% endfor %}
+        </select>
+        <h1></h1>
+        <th> Rating </th>
+        <select name="rating" id="rating">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
+        
+        <h1></h1>
+        <th>Comments/Feedback</th>
+        <textarea name="comment" cols="40" rows="5"></textarea>
+        <div class = "search"> 
+            <button class = btn> Submit </button> </a>  
+        </div> 
+        
+    </form> 
+    </body>
+    <body>
+        <a href="/customer/home"> Go Back</a>
+    </body>
+</html>

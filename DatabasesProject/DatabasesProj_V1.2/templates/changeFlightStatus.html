@@ -1,0 +1,22 @@
+<html>
+    <h1>Change Flight Status:</h1>
+    <form action = "/changeStatusAuth"method="POST">
+        <th> Flight Number: </th>
+        <input type="char(10)" name="flightNum" placeholder="Flight Number" required/></br>
+        <!-- <th>Airplane ID:  </th>
+        <input type="varchar(50)" name="airplaneid" placeholder="Airplane ID" required/></br> -->
+        <th>Flight Status: </th>
+        <select name="status" required>
+            <option value="On Time">On Time</option>
+            <option value="Delayed">Delayed</option>
+            <option value="Cancelled">Cancelled</option>
+        </select></br>
+        <h1></h1>
+        <div class = "submit">
+            <button class = btn> Approve </button> </a>
+        </div>
+        <body>
+            <a href="/staff/home"> Go Back</a>
+        </body>
+</html>
+

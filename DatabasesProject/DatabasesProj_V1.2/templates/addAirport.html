@@ -1,0 +1,20 @@
+<html>
+  <h1>Add an Airport</h1>
+      <body>
+    <form action="/addAirportAuth" method="POST">
+        <th> Airport Name </th>
+        <input type="varchar(50)" name="airportName" placeholder="(JFK, LAX...)" required/> </br>
+        <th> City </th>
+        <input type="varchar(50)" name = "city" placeholder="City" required/> </br>
+        <th> Country </th>
+        <input type="varchar(50)" name = "country" placeholder="Country" required/></br>
+        <th> Airport Type</th>
+        <input type="varchar(50)" name = "airportType" placeholder="Airport Type" required/> </br>
+        <input type="submit" value = Submit>
+        {% if error %}
+            <p class="error"><strong>Error:</strong> {{error}}</p>
+        {% endif %}
+    </body>
+    </form>
+    <a href="/staff/home">Go back</a>
+</html>

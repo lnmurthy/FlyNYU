@@ -1,0 +1,34 @@
+<html>
+    <body>
+    <form action="/addFlightAuth" method="POST">
+        <th> NEW FLIGHT </th> </br>
+        <th> departure date</th>
+        <input type="date" name="deptdate" placeholder="Departure Date" required/> </br>
+        <th> departure time</th>
+        <input type="time" name="depttime" placeholder="Departure Time" required/> </br>
+        <th> flight number</th>
+        <input type="char(10) " name = "flightnum" placeholder="Flight Number" required/> </br>
+        <th> arrival time</th>
+        <input type="time" name = "arrtime" placeholder="Arrival Time" required/></br>
+        <th> arrival airport</th>
+        <input type="varchar(50)" name = "arrairport" placeholder="Arrival Airport" required/> </br>
+        <th> arrival date</th>
+        <input type="date" name = "arrdate" placeholder="Arrival Date" required/> </br>
+        <th> base price </th>
+        <input type="decimal(8,2)" name = "baseprice" placeholder="Base Price" required/> </br>
+        <th> Airplane ID </th>
+        <input type="varchar(50)" name = "idairplane" placeholder="Airplane ID" required/> </br>
+        <th> Departure Airport </th>
+        <input type="varchar(50)" name = "deptairport" placeholder="Departure Airport" required/> </br>
+        <th> stats</th>
+        <input type="varchar(50)" name="states" placeholder="stats" required/> </br>
+        <input type="submit" value = Submit>
+        {% if error %}
+            <p class="error"><strong>Error:</strong> {{error}}</p>
+        {% endif %}
+    </body>
+    </form>
+    <body>
+        <a href="/staff/home"> Go Back</a>
+    </body>
+</html>

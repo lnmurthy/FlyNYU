@@ -1,0 +1,17 @@
+<html>
+  <h1>Flight Stats: {{flight_num}}</h1>
+  <table>
+    <th>Rating</th>
+    <th>Comment</th>
+    {% for line in flight %}
+    <tr>
+      <td>{{line['ratings']}}</td>
+      <td>{{line['comments']}}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  <h1></h1>
+  <th>The average rating for flight {{flight_num}}: {{average}}</th>
+  <h1></h1>
+  <a href="/viewPreviousFlightsAuth"> Go Back </a>
+</html>

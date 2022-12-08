@@ -1,0 +1,53 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buy Ticket</title>
+</head>
+<body>
+    <h1> Buy Ticket For {{airline}} Flight #{{flight}}</h1>
+    <form action = "/customer/buyAuth"method="POST">
+        <th> PRICE </th>
+        <select name="price" required>
+            <option value={{price}}>{{price}}</option>
+        </select>
+        <th> Flight Number</th>
+        <select name="flightnum" required>
+            <option value={{flight}}> {{flight}}</option>
+        </select>
+        <h1></h1>
+        <th> Name on Card</th>
+        <input type="text" name="name" required> </br>
+        <th>Card Type</th>
+        <select name="type" required>
+            <option value="debit">Debit</option>
+            <option value="Credit">Credit</option>
+        </select>
+        <th> Card Number</th>
+        <input type="text" name="cardnumber" required/> </br>
+        <th>EXP Month</th>
+        <select name="month" id="rating" required>  </br>
+            <option value="01">01</option>
+            <option value="02">02</option>
+            <option value="03">03</option>
+            <option value="04">04</option>
+            <option value="05">05</option>
+            <option value="06">06</option>
+            <option value="07">07</option>
+            <option value="08">08</option>
+            <option value="09">09</option>
+            <option value="10">10</option>
+            <option value="11">11</option>
+            <option value="12">12</option>  
+        </select>
+        <th> EXP YEAR</th>
+        <input type="text" name="year" required> </br>
+        
+        <div class = "search"> 
+            <button class = btn> BUY </button> </a>  
+        </div>    
+    </form>
+</body>
+</html>

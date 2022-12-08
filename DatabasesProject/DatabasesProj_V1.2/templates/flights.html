@@ -1,0 +1,151 @@
+
+<!DOCTYPE html>
+<html>
+    <a href="/customer/home">Home</a>
+  
+<h2> Search For a Flight Here </h2> 
+<body>	 
+
+<form action = "/searchFlights"method="POST">
+	<th>departure city/airport  </th>
+    <input type="text" name="deptairport" placeholder="departure city or airport"required/> </br>
+	<th>destination city/airport</th>
+	<input type="text" name="arrairport" placeholder="arrival city or airport" required/> </br>
+	<th>depature date</th>
+	<input type="text" name="deptdate" placeholder="YYYY-MM-DD" required/> </br>
+	<th>return date</th>
+	<input type="text" name="arrdate" placeholder="YYYY-MM-DD" /> </br>
+    <div class = "search"> 
+        <button class = btn> Search </button> </a>  
+    </div>    
+</form> 
+<table>
+	<th>Departure Airport</th>
+	<th>Destination City</th>
+	<th>Departure Date</th>
+	<th>Return Date</th>
+	<th>ID Airplane </th>
+	<th>Flight Status</th>
+{% for line in flight %}
+	<tr>
+		<td>{{line['dept_airport']}}</td>
+		<td>{{line['arr_airport']}}</td> 
+		<td>{{line['dept_date']}}</td>
+		<td>{{line['arr_date']}}</td>
+		<td>{{line['id_airplane']}}</td>
+		<td>{{line['stats']}}</td>
+		<td> <button class = btn> BUY TICKET </button></td>
+
+	</tr>
+{% endfor %}
+</table>
+</body>
+</html>
+<!DOCTYPE html> 
+<html> 
+<h2>Buy a Ticket</h2>
+    <body>	 
+    <form action = "/purchaseTicketsAuth"method="POST">
+        <th>email </th>
+        <input type="text" name="cus_email" placeholder="email"required/> </br>
+        <th>ticket id</th>
+		<select type="text" name="cus_ticket_id" id="ticket id" required>
+		<option value="1">1</option>
+		  <option value="111111">111111</option>
+		  <option value="123456">123456</option>
+		  <option value="222222">222222</option>
+		  <option value="333333">333333</option>
+		  <option value="444444">444444</option>
+		  <option value="777777">777777</option>
+		  <option value="999999">999999</option>
+
+
+		</select></br>
+        <th>depature date</th>
+        <input type="text" name="deptdate" placeholder="YYYY-MM-DD" required/> </br>
+        <th>depature time</th>
+        <input type="text" name="depttime" placeholder="time" /> </br> 
+        <th>flight number</th>
+        <input type="text" name="flightnum" placeholder="flight number" /> </br>
+        <th>price</th>
+		<select name="price" id="price" required>
+		  <option value="300">300</option>
+		  <option value="500">400</option>
+		  <option value="500">500</option>
+		  <option value="500">600</option>
+		  <option value="900">900</option>
+		</select></br>
+        <th>card type</th>
+        <input type="text" name="cardtype" placeholder="card type" /> </br>
+        <th>card number</th>
+        <input type="text" name="cardnumber" placeholder="card number" /> </br>
+        <th>name on card</th>
+        <input type="text" name="nameoncard" placeholder="name on card" /> </br> 
+        <th>exp month</th>
+        <input type="text" name="expmonth" placeholder="exp month" /> </br> 
+        <th>exp year</th>
+        <input type="text" name="expyear" placeholder="expyear" /> </br>
+        <div class = "search"> 
+            <button class = btn> Search </button> </a>  
+        </div>    
+    </form> 
+    </body>
+</html>
+
+<!DOCTYPE html> 
+<html> 
+<h2>View Your Flights</h2>
+<body>	 
+<form action = "/customerFlightAuth"method="POST">
+	<th>email </th>
+	<input type="text" name="cus_email" placeholder="email"required/> </br>
+	<div class = "search"> 
+		<button class = btn> Search </button> </a>  
+	</div>   
+</form> 
+<form>
+<table>
+	<th>Departure Airport</th>
+	<th>Arrival Airport</th>
+	<th>Ticket ID</th>
+	<th>Departure Date</th>
+	<th>Flight Number</th>
+{% for line in buys %}
+	<tr>
+		<td>{{line['dept_airport']}}</td>
+		<td>{{line['arr_airport']}}</td>
+		<td>{{line['ticket_id']}}</td>
+		<td>{{line['dept_date']}}</td>
+		<td>{{line['flight_num']}}</td> 
+	</tr>
+{% endfor %}
+</table>
+</form>
+
+</body>
+</html>
+
+<!DOCTYPE html> 
+<html> 
+<h2>Cancel Your Future Flights</h2>
+<body>	 
+	<form action = "/cusCancelFlightAuth"method="POST">
+		<th>ticket id</th>
+		<select type="text" name="cus_ticket_id" id="ticket id" required>
+			<option value="1">1</option>
+			<option value="111111">111111</option>
+			<option value="123456">123456</option>
+			<option value="222222">222222</option>
+			<option value="333333">333333</option>
+			<option value="444444">444444</option>			
+			<option value="777777">777777</option>
+			<option value="999999">999999</option>
+
+		</select></br> 
+		<div class = "search"> 
+			<button class = btn> Cancel </button> </a>  
+		</div>  
+	</form>
+</body>
+</html>
+ 

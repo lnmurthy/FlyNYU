@@ -1,0 +1,24 @@
+<html>
+  <h1>Past Flights: {{airline_name}}</h1>
+
+  <table>
+    <th>Flight Number</th>
+    {% for line in flight %}
+    <tr>
+      <td>{{line['flight_num']}}</td>
+      <td> 
+                <form action="/viewPreviousFlightsAuth2" method="post">
+                    <div class="search">
+                        <button class = btn name = "flight_num" value={{line['flight_num']}}> Flight Stats </button>
+                    </div>
+                </form>
+    </td>
+    </tr>
+    {% endfor %}
+  </table>
+  <h1></h1>
+
+
+  <h1></h1>
+  <a href="/staff/home">Go back</a>
+</html>

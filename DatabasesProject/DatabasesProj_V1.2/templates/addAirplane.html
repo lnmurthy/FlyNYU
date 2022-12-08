@@ -1,0 +1,22 @@
+<html>
+  <h1>Add an Aircraft</h1>
+      <body>
+    <form action="/addAirplaneAuth" method="POST">
+        <th> Airplane ID </th>
+        <input type="varchar(50)" name="idAirplane" placeholder="Airplane ID" required/> </br>
+        <th> Number of Seats </th>
+        <input type="int(255)" name = "numSeats" placeholder="Number of Seats" required/> </br>
+        <th> Manufacturing Company</th>
+        <input type="varchar(50)" name = "manuCompany" placeholder="Manufacturing Company" required/></br>
+        <th> age</th>
+        <input type="date" name = "age" placeholder="Age" required/> </br>
+        <input type="submit" value = Submit>
+        {% if error %}
+            <p class="error"><strong>Error:</strong> {{error}}</p>
+        {% endif %}
+    </body>
+    </form>
+    <body>
+        <a href="/viewAirplane"> Go Back</a>
+    </body>
+</html>

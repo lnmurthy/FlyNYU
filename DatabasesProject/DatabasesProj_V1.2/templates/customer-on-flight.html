@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer on Flight</title>
+</head>
+<body>
+    <h1> Passengers on {{airline}} flight {{flight}}</h1>
+    <table>
+        <th> Passenger Name</th>
+        <th> Passenger Email</th>
+        {% for line in data %}
+	<tr>
+        <td>{{line['name']}}</td>
+        <td>{{line['email']}}</td>
+    </tr>
+	{% endfor %}
+    </table>
+</body>
+<body>
+    <a href="/staff/viewflights"> Go Back</a>
+</body>
+</html>

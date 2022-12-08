@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Search Flight</title>
+</head>
+<body>
+    <form action = "/customer/search/flights"method="POST">
+        <th>departure city/airport  </th>
+        <input type="text" name="deptairport" placeholder="departure city or airport"required/> </br>
+        <th>destination city/airport</th>
+        <input type="text" name="arrairport" placeholder="arrival city or airport" required/> </br>
+        <th>depature date</th>
+        <input type="date" name="deptdate" placeholder="YYYY-MM-DD" required/> </br>
+        <div class = "search"> 
+            <button class = btn> Search </button> </a>  
+        </div>    
+    </form> 
+    
+</body>
+<body>
+    <table> 
+        <th>Flight Number</th>
+        <th>Departure Airport</th>
+        <th>Destination City</th>
+        <th>Departure Date</th>
+        <th>Return Date</th>
+        
+        
+        {% for line in flight %}
+        <tr>
+            <td>{{line['flight_num']}}</td>
+            <td>{{line['dept_airport']}}</td>
+            <td>{{line['arr_airport']}}</td> 
+            <td>{{line['dept_date']}}</td>
+            <td>{{line['arr_date']}}</td>
+            <td> 
+                <form action="/customer/buy/flight" method="post">
+                    <div class="search">
+                        <button class = btn name = "flightnum" value={{line['flight_num']}}> Buy </button> </a>
+                    </div>
+                </form>
+            </td>
+            
+    
+        </tr>
+        {% endfor %}
+        
+      </table>
+</body>
+<body>
+    <a href="/customer/home"> Go Back</a>
+</body>
+</html>
