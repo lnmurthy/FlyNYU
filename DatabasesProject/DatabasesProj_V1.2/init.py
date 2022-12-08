@@ -278,9 +278,8 @@ def customerFlight():
 	return render_template('flights.html')
 
 
-
 @app.route('/customer/view/myflights')
-def customerViewmyFlights():
+def customerViewmyFlights(msg=None):
 	customer = cus_check_session()
 	if customer:
 		cursor = conn.cursor()
@@ -288,7 +287,7 @@ def customerViewmyFlights():
 		cursor.execute(query, (customer[0]['email']))
 		data = cursor.fetchall()
 		cursor.close()
-		return render_template('cus-view-flight.html',data=data)
+		return render_template('cus-view-flight.html',data=data,msg=msg)
 	return redirect('/login/customer')
 
 
@@ -317,6 +316,7 @@ def flightSearch():
 
 @app.route('/cusCancelFlight', methods=['GET', 'POST'])
 def cusCancelFlight():
+	currentdate = get_date()  
 	customer = cus_check_session()
 	if customer:
 		flightnum = request.form['flight_num']
@@ -328,36 +328,40 @@ def cusCancelFlight():
 		))
 		data = cur.fetchall()
 		ticketid = data[0]['ticket_id']
-
-		delete = 'DELETE FROM buys WHERE ticket_id = %s and dept_date = %s and dept_time = %s'
-		cur.execute(delete, (
-			ticketid,
-			data[0]['dept_date'],
-			data[0]['dept_time']
-		))
-
-		del_ticket = 'DELETE FROM ticket WHERE ID = %s and dept_date = %s and dept_time = %s and flight_num = %s' 
-		cur.execute(del_ticket, (
-			ticketid,
-			data[0]['dept_date'],
-			data[0]['dept_time'],
-			flightnum
-
-		))
-		month= data[0]['dept_date'].month
-		day = data[0]['dept_date'].day
-		year = data[0]['dept_date'].year
-		currentDate = get_format_date().strip('-')
-
-		seat = 'UPDATE `manage` SET `total_seats`= total_seats - 1 WHERE total_seats >=1'
-		cur.execute(seat)
-		conn.commit()
-		cur.close()
-		return redirect('/customer/view/myflights')
-	return redirect('/login/customer')
-
-
-
+		deptdate = data[0]['dept_date'] 
+		depttime = data[0]['dept_time']
+		year = deptdate.year
+		month = deptdate.month
+		day = deptdate.day 
+		strtime = str(depttime)  
+		mylist = strtime.split(':')  
+		hour = int(mylist[0])
+		minute = int(mylist[1])
+		d1 = datetime(year,month,day,hour,minute,0) 
+		d2 = datetime.strptime(currentdate, "%d/%m/%Y %H:%M:%S") 
+		delta = d1-d2 
+		seconds = delta.total_seconds()
+		hours = seconds // 3600
+		error = None 
+#ERR MSGS PRINT IN TERMINAL BUT NOT ON PAGE
+		if hours < 24:  
+			error =  'You cannot cancel your flight' 
+			print(error)
+			return customerViewmyFlights(error)
+		else: 
+			success = 'your flight has been cancelled' 
+			cancel = True 
+			cursor = conn.cursor()
+			query = 'DELETE FROM buys WHERE ticket_id = %s and dept_date = %s and dept_time = %s'
+			cursor.execute(query, (ticketid,deptdate,depttime))  
+			print(success)
+			seat = 'UPDATE `manage` SET `total_seats`= total_seats - 1 WHERE total_seats > 0'
+			cursor.execute(seat)
+			conn.commit()
+			cur.close() 
+			print('the seat has been removed')
+			return customerViewmyFlights(success)
+		return redirect('/login/customer')   
 @app.route('/staff/searchflights/date', methods=['GET', 'POST'])
 def staffSearchFlights():
 	air_data = staff_check_session()
@@ -919,6 +923,32 @@ def viewPreviousFlightsAuth2():
 	
 
 	return redirect('/login/staff')
+
+@app.route('/staff/viewRevenue') 
+def staffviewRevenue():  
+	return render_template('staff-revenue.html') 
+
+@app.route('/staff/viewRevenueAuth',methods=['GET', 'POST']) 
+def staffviewRevenueAuth():  
+	air_data = staff_check_session() 
+	if(air_data):
+		startDate = request.form['startDate']
+		endDate = request.form['endDate']
+		cursor = conn.cursor()  
+		query = 'SELECT sum(sold_price) as total,  MONTH(b.dept_date) as m, YEAR(b.dept_date) as y, b.flight_num FROM buys as b, manage as m WHERE %s <= b.dept_date and b.dept_date < %s and b.flight_num = m.flight_num and m.airline_name = %s group by b.flight_num, m,y'
+		cursor.execute(query,(
+			startDate+ "00:00:00",
+			endDate+ "00:00:00",
+			air_data[0]['airline_name']))
+		data = cursor.fetchall() 		
+		print('-----------------------------',data)
+		values = [int(line['total']) for line in data]  
+		sumvalues = sum(values)
+		values.append(0)		
+		cursor.close()
+		return render_template('staff-revenue.html',total=data,values=values,sumvalues=sumvalues) 
+
+
 
 @app.route('/logout/customer') 
 def logout_customer():

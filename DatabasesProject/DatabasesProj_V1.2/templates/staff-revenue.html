@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+    <a href="/staff/home">Go To Staff Home</a> 
+<body> 
+<h2> Ticket Revenue </h2> 
+<body>
+    <form action = "/staff/viewRevenueAuth"method="POST">
+        <th>From Start date</th>
+        <input type="date" name="startDate" placeholder="YYYY-MM-DD"/> </br>
+        <th>To End date</th>
+        <input type="date" name="endDate" placeholder="YYYY-MM-DD" /> </br>
+        <div class = "search"> 
+            <button class = btn> Search </button> </a>  
+        </div>    
+    </form> 
+</body>
+
+    <table>
+        <th> month-year</th>
+        <th> revenue</th> 
+
+        {% for line in total %}
+        <tr>
+            <td>{{line['m']}}-{{line['y']}}</td>
+            <td>{{line['total']}}</td> 
+        </tr> 
+        {% endfor %}
+
+    </table> 
+        <th> the total revenue is: {{sumvalues}} USD </th>
+
+</body>
+
+</html> 
+
+<!-- the manage table does not automatically update with buys table.
+have to manually add flight num -->
