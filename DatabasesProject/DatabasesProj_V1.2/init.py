@@ -328,53 +328,6 @@ def cusCancelFlight():
 		return redirect('/customer/view/myflights')
 	return redirect('/login/customer')
 
-@app.route('/cusCancelFlightAuth', methods=['GET', 'POST'])
-def cusCancelFlightAuth(): 
-	name = cus_check_session()
-	currentdate = get_date()  
-	cursor = conn.cursor()
-	cus_ticket_id = request.form['cus_ticket_id']    
-	query1 = 'SELECT dept_date, dept_time from buys where ticket_id = %s' 
-	cursor.execute(query1, (cus_ticket_id))   
-	data = cursor.fetchall()  
-	if len(data) == 0: 
-		error =  'No data found with this ID '
-		return render_template('flights.html',error = error) 
-	deptdate = data[0]['dept_date'] 
-	depttime = data[0]['dept_time']   
-	year = deptdate.year
-	month = deptdate.month
-	day = deptdate.day 
-	strtime = str(depttime)  
-	mylist = strtime.split(':')  
-	hour = int(mylist[0])
-	minute = int(mylist[1])
-	print('--------------------',year)
-	print('--------------------',month)
-	print('--------------------',day)
-	print('--------------------',hour)
-	print('--------------------',minute) 
-	d1 = datetime(year,month,day,hour,minute,0) 
-	d2 = datetime.strptime(currentdate, "%d/%m/%Y %H:%M:%S") 
-	delta = d1-d2 
-	seconds = delta.total_seconds()
-	hours = seconds // 3600
-	print('THIS IS DELTA-------------',delta)  
-	print('THIS IS HOURS-------------',hours)
-	if hours < 24:  
-		print('You cannot cancel your flight')
-		error =  'You cannot cancel your flight within 1 day of departure'
-		return render_template('flights.html',error = error)  
-	else: 
-		print('you flight has been canceled')
-		cursor = conn.cursor()
-		query = 'DELETE from buys where ticket_id = %s ' 
-		cursor.execute(query, (cus_ticket_id)) 
-		conn.commit() 
-#time - combine date and time 
-#error message 
-	cursor.close()
-	return render_template('flights.html') 
 
 
 @app.route('/staff/searchflights/date', methods=['GET', 'POST'])
@@ -516,7 +469,7 @@ def customerFlightAuth():
 		current_date = get_format_date()
 		cursor = conn.cursor()	
 		
-		query = 'SELECT f.flight_num, f.dept_airport, f.arr_airport, f.dept_date, f.arr_date FROM flight as f, manage WHERE (f.dept_date = %s OR f.dept_date >= %s) and f.dept_date >= %s and f.dept_airport = (SELECT name_airport FROM airport WHERE city = %s or name_airport = %s) and f.arr_airport = (SELECT name_airport FROM airport WHERE city = %s or name_airport=%s) and manage.flight_num = f.flight_num and (manage.max_seats >= manage.total_seats)'
+		query = 'SELECT f.flight_num, f.dept_airport, f.arr_airport, f.dept_date, f.arr_date FROM flight as f, manage WHERE (f.dept_date = %s OR f.dept_date >= %s) and f.dept_date >= %s and f.dept_airport = (SELECT name_airport FROM airport WHERE city = %s or name_airport = %s) and f.arr_airport = (SELECT name_airport FROM airport WHERE city = %s or name_airport=%s) and manage.flight_num = f.flight_num and (manage.max_seats > manage.total_seats)'
 		cursor.execute(query, (
 			deptdate,
 			deptdate,
