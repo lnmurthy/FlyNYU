@@ -2,7 +2,11 @@
     <h1>Change Flight Status:</h1>
     <form action = "/changeStatusAuth"method="POST">
         <th> Flight Number: </th>
-        <input type="char(10)" name="flightNum" placeholder="Flight Number" required/></br>
+        <select name="flightNum" required>
+            {% for line in flight %}
+            <option value={{line['flight_num']}}> {{line['flight_num']}}</option>
+            {% endfor %}
+        </select> </br>
         <!-- <th>Airplane ID:  </th>
         <input type="varchar(50)" name="airplaneid" placeholder="Airplane ID" required/></br> -->
         <th>Flight Status: </th>

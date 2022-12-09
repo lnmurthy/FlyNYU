@@ -300,7 +300,7 @@ def flightSearch():
 	current_date = get_format_date()
 	cursor = conn.cursor()	
 		
-	query = 'SELECT  f.stats,f.flight_num, f.dept_airport, f.arr_airport, f.dept_date, f.arr_date FROM flight as f, manage as m WHERE (f.dept_date = %s OR f.dept_date >= %s) and f.dept_date >= %s and f.dept_airport = (SELECT name_airport FROM airport WHERE city = %s or name_airport = %s) and f.arr_airport = (SELECT name_airport FROM airport WHERE city = %s or name_airport=%s) and m.flight_num = f.flight_num and ((m.max_seats - m.total_seats) > 0)'
+	query = 'SELECT  f.stats, f.flight_num, f.dept_airport, f.arr_airport, f.dept_date, f.arr_date FROM flight as f, manage as m WHERE (f.dept_date = %s OR f.dept_date >= %s) and f.dept_date >= %s and f.dept_airport = (SELECT name_airport FROM airport WHERE city = %s or name_airport = %s) and f.arr_airport = (SELECT name_airport FROM airport WHERE city = %s or name_airport=%s) and m.flight_num = f.flight_num and ((m.max_seats - m.total_seats) > 0)'
 	cursor.execute(query, (
 		deptdate,
 		deptdate,
@@ -472,7 +472,15 @@ def flight_helper(id):
 	return data
 @app.route('/changeStatus', methods=['GET', 'POST'])
 def changeFlightStatus():
-	return render_template('changeFlightStatus.html')
+	airline = staff_check_session()
+	if airline:
+		cursor = conn.cursor()
+		query = 'SELECT m.flight_num FROM manage as m, flight as f WHERE f.flight_num = m.flight_num and m.airline_name = %s'
+		cursor.execute(query, airline[0]['airline_name'])
+		data = cursor.fetchall()
+		cursor.close()
+		return render_template('changeFlightStatus.html', flight = data)
+	return redirect('/staff/home')
 
 @app.route('/changeStatusAuth', methods=['GET', 'POST'])
 def changeFlightStatusAuth():
@@ -499,8 +507,6 @@ def customerViewFlights():
 	if customer:
 		return render_template('cus-search-flights.html')
 
-
-
 	return redirect('/login/customer')
 
 @app.route('/customer/search/flights', methods=['GET', 'POST'])
@@ -513,7 +519,7 @@ def customerFlightAuth():
 		current_date = get_format_date()
 		cursor = conn.cursor()	
 		
-		query = 'SELECT m.max_seats, m.total_seats, f.flight_num, f.dept_airport, f.arr_airport, f.dept_date, f.arr_date FROM flight as f, manage as m WHERE (f.dept_date = %s OR f.dept_date >= %s) and f.dept_date >= %s and f.dept_airport = (SELECT name_airport FROM airport WHERE city = %s or name_airport = %s) and f.arr_airport = (SELECT name_airport FROM airport WHERE city = %s or name_airport=%s) and m.flight_num = f.flight_num and ((m.max_seats - m.total_seats) > 0)'
+		query = 'SELECT f.flight_num, f.dept_airport, f.arr_airport, f.dept_date, f.arr_date FROM flight as f, manage as m WHERE (f.dept_date = %s OR f.dept_date >= %s) and f.dept_date >= %s and f.dept_airport = (SELECT name_airport FROM airport WHERE city = %s or name_airport = %s) and f.arr_airport = (SELECT name_airport FROM airport WHERE city = %s or name_airport=%s) and m.flight_num = f.flight_num and ((m.max_seats - m.total_seats) > 0)'
 		cursor.execute(query, (
 			deptdate,
 			deptdate,
@@ -592,8 +598,6 @@ def confirmCustomerBuy():
 		conn.commit()
 		cur.close()
 		return redirect('/customer/view/myflights')
-
-
 	return redirect('/login/customer')
 
 def get_flight_info(num):
@@ -629,17 +633,6 @@ def staffViewFlights():
 		cursor.close()
 		return render_template('staff-view-flights.html', flight = data, airline_name=air_data)
 
-@app.route('/post', methods=['GET', 'POST'])
-def post():
-	username = session['username']
-	cursor = conn.cursor()
-	blog = request.form['blog']
-	query = 'INSERT INTO blog (blog_post, username) VALUES(%s, %s)'
-	cursor.execute(query, (blog, username))
-	conn.commit()
-	cursor.close()
-	return redirect(url_for('home'))
-	return redirect('/login/staff')
 
 
 @app.route('/staff/reports')
@@ -739,6 +732,13 @@ def addAirplaneAuth():
 		manufact = request.form['manuCompany']
 		age = request.form['age']
 		cursor = conn.cursor()
+		check = 'SELECT * FROM airplane WHERE id_airplane = %s'
+		cursor.execute(check, ID)
+		if cursor.fetchall():
+			error = "Airplane Already Exists"
+			cursor.close()
+			return render_template('staff-errorpage.html', error=error)
+
 		query = 'INSERT INTO `airplane`(`id_airplane`, `airline_name`, `num_of_seats`, `manufacturing_company`, `age`) VALUES (%s,%s,%s,%s,%s)'
 		cursor.execute(query, (
 			ID,
@@ -885,10 +885,7 @@ def viewPreviousFlightsAuth():
 		#query = 'SELECT distinct b.flight_num, avg(b.ratings) as avg_rating, b.comments FROM buys as b, manage as m WHERE m.airline_name = %s and m.flight_num = b.flight_num GROUP BY b.flight_num ,b.comments'
 		cursor.execute(query, (air_name))
 		data = cursor.fetchall()
-		#values = [int(line['avg_rating']) for line in data]  
-		#sumvalues = sum(values)
-		#count_values = len(values)
-		#average = sumvalues/count_values
+		
 		cursor.close()
 		return render_template('pastFlights.html', flight = data, airline_name = air_name)#, average = average)
 
