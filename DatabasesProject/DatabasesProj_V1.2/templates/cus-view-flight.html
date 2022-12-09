@@ -25,19 +25,27 @@
 		<td>{{line['arr_date']}}</td>
 		<td>{{line['id_airplane']}}</td>
 		<td>{{line['stats']}}</td>
-		
+
 		<td> 
             <form action="/cusCancelFlight" method="post">
                 <div class="search">
                     <button class = btn name = "flight_num" value={{line['flight_num']}}> Cancel </button> </a>
-                </div>
+                </div> 
+
+
             </form>
 		</td>
     </tr>
-	{% endfor %}
+        {% endfor %}
     </table>
     
 </body>
+<body>
+    {% if msg %}
+    <p class="error"><strong>Message:</strong> {{msg}}</p>
+    {% endif %} 
+</body>
+
 <body>
     <a href="/customer/home"> Go Back</a>
 </body>
