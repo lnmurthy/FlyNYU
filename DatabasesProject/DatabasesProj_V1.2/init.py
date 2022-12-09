@@ -46,7 +46,12 @@ def register_customer():
 
 @app.route('/register/staff')
 def register_staff():
-	return render_template('register-staff.html')
+	cursor = conn.cursor()
+	query = 'SELECT airline_name FROM airline'
+	cursor.execute(query)
+	data = cursor.fetchall()
+	cursor.close()
+	return render_template('register-staff.html', airline=data)
 
 #Authenticates the login
 @app.route('/loginAuth', methods=['GET', 'POST'])
@@ -273,9 +278,8 @@ def customerFlight():
 	return render_template('flights.html')
 
 
-
 @app.route('/customer/view/myflights')
-def customerViewmyFlights():
+def customerViewmyFlights(msg=None):
 	customer = cus_check_session()
 	if customer:
 		cursor = conn.cursor()
@@ -283,12 +287,36 @@ def customerViewmyFlights():
 		cursor.execute(query, (customer[0]['email']))
 		data = cursor.fetchall()
 		cursor.close()
-		return render_template('cus-view-flight.html',data=data)
+		return render_template('cus-view-flight.html',data=data,msg=msg)
 	return redirect('/login/customer')
+
+
+@app.route('/searchFlights', methods=['GET', 'POST'])
+def flightSearch():
+	deptairport = request.form['deptairport']
+	arrairport = request.form['arrairport']
+	deptdate = request.form['deptdate']
+	current_date = get_format_date()
+	cursor = conn.cursor()	
+		
+	query = 'SELECT  f.stats, f.flight_num, f.dept_airport, f.arr_airport, f.dept_date, f.arr_date FROM flight as f, manage as m WHERE (f.dept_date = %s OR f.dept_date >= %s) and f.dept_date >= %s and f.dept_airport = (SELECT name_airport FROM airport WHERE city = %s or name_airport = %s) and f.arr_airport = (SELECT name_airport FROM airport WHERE city = %s or name_airport=%s) and m.flight_num = f.flight_num and ((m.max_seats - m.total_seats) > 0)'
+	cursor.execute(query, (
+		deptdate,
+		deptdate,
+		current_date,
+		deptairport,
+		deptairport,
+		arrairport,
+		arrairport
+	))
+	flight = cursor.fetchall()
+	cursor.close()
+	return render_template('flights.html', flight=flight)
 
 
 @app.route('/cusCancelFlight', methods=['GET', 'POST'])
 def cusCancelFlight():
+	currentdate = get_date()  
 	customer = cus_check_session()
 	if customer:
 		flightnum = request.form['flight_num']
@@ -300,36 +328,40 @@ def cusCancelFlight():
 		))
 		data = cur.fetchall()
 		ticketid = data[0]['ticket_id']
-
-		delete = 'DELETE FROM buys WHERE ticket_id = %s and dept_date = %s and dept_time = %s'
-		cur.execute(delete, (
-			ticketid,
-			data[0]['dept_date'],
-			data[0]['dept_time']
-		))
-
-		del_ticket = 'DELETE FROM ticket WHERE ID = %s and dept_date = %s and dept_time = %s and flight_num = %s' 
-		cur.execute(del_ticket, (
-			ticketid,
-			data[0]['dept_date'],
-			data[0]['dept_time'],
-			flightnum
-
-		))
-		month= data[0]['dept_date'].month
-		day = data[0]['dept_date'].day
-		year = data[0]['dept_date'].year
-		currentDate = get_format_date().strip('-')
-
-		seat = 'UPDATE `manage` SET `total_seats`= total_seats - 1 WHERE total_seats >=1'
-		cur.execute(seat)
-		conn.commit()
-		cur.close()
-		return redirect('/customer/view/myflights')
-	return redirect('/login/customer')
-
-
-
+		deptdate = data[0]['dept_date'] 
+		depttime = data[0]['dept_time']
+		year = deptdate.year
+		month = deptdate.month
+		day = deptdate.day 
+		strtime = str(depttime)  
+		mylist = strtime.split(':')  
+		hour = int(mylist[0])
+		minute = int(mylist[1])
+		d1 = datetime(year,month,day,hour,minute,0) 
+		d2 = datetime.strptime(currentdate, "%d/%m/%Y %H:%M:%S") 
+		delta = d1-d2 
+		seconds = delta.total_seconds()
+		hours = seconds // 3600
+		error = None 
+#ERR MSGS PRINT IN TERMINAL BUT NOT ON PAGE
+		if hours < 24:  
+			error =  'You cannot cancel your flight' 
+			print(error)
+			return customerViewmyFlights(error)
+		else: 
+			success = 'your flight has been cancelled' 
+			cancel = True 
+			cursor = conn.cursor()
+			query = 'DELETE FROM buys WHERE ticket_id = %s and dept_date = %s and dept_time = %s'
+			cursor.execute(query, (ticketid,deptdate,depttime))  
+			print(success)
+			seat = 'UPDATE `manage` SET `total_seats`= total_seats - 1 WHERE total_seats > 0'
+			cursor.execute(seat)
+			conn.commit()
+			cur.close() 
+			print('the seat has been removed')
+			return customerViewmyFlights(success)
+		return redirect('/login/customer')   
 @app.route('/staff/searchflights/date', methods=['GET', 'POST'])
 def staffSearchFlights():
 	air_data = staff_check_session()
@@ -365,8 +397,17 @@ def staffViewSpecificFlgiht():
 
 @app.route('/addFlight', methods=['GET', 'POST'])
 def CreateNewFlights():
-	if (staff_check_session):
-		return render_template('addFlight.html')
+	airline = staff_check_session()
+	if (airline):
+		cursor = conn.cursor()
+		query = 'SELECT id_airplane FROM airplane WHERE airline_name = %s'
+		airport = 'SELECT name_airport FROM airport'
+		cursor.execute(query, airline[0]['airline_name'])
+		data = cursor.fetchall()
+		cursor.execute(airport)
+		air = cursor.fetchall()
+		cursor.close()
+		return render_template('addFlight.html', airplane = data, airport = air)
 	return redirect('/login/staff')
 
 
@@ -386,6 +427,13 @@ def CreateNewFlighAtuth():
 		deptairport = request.form['deptairport']
 		states = request.form['states']
 		cursor = conn.cursor()
+		check = 'SELECT * FROM flight WHERE flight_num = %s'
+		cursor.execute(check, flightnum)
+		if (cursor.fetchall()):
+			error = 'Flight Number Already in use'
+			cursor.close()
+			return render_template('staff-errorpage.html', error=error)
+
 		ins = 'INSERT INTO flight(`dept_date`, `dept_time`, `flight_num`, `arr_time`,`arr_airport`, `arr_date`, `base_price`, `id_airplane`, `dept_airport`, `stats`) VALUES( %s, %s, %s, %s,%s, %s,%s, %s,%s, %s)'
 		cursor.execute(ins, (
 			deptdate, 
@@ -428,7 +476,15 @@ def flight_helper(id):
 	return data
 @app.route('/changeStatus', methods=['GET', 'POST'])
 def changeFlightStatus():
-	return render_template('changeFlightStatus.html')
+	airline = staff_check_session()
+	if airline:
+		cursor = conn.cursor()
+		query = 'SELECT m.flight_num FROM manage as m, flight as f WHERE f.flight_num = m.flight_num and m.airline_name = %s'
+		cursor.execute(query, airline[0]['airline_name'])
+		data = cursor.fetchall()
+		cursor.close()
+		return render_template('changeFlightStatus.html', flight = data)
+	return redirect('/staff/home')
 
 @app.route('/changeStatusAuth', methods=['GET', 'POST'])
 def changeFlightStatusAuth():
@@ -455,8 +511,6 @@ def customerViewFlights():
 	if customer:
 		return render_template('cus-search-flights.html')
 
-
-
 	return redirect('/login/customer')
 
 @app.route('/customer/search/flights', methods=['GET', 'POST'])
@@ -469,7 +523,7 @@ def customerFlightAuth():
 		current_date = get_format_date()
 		cursor = conn.cursor()	
 		
-		query = 'SELECT m.max_seats, m.total_seats, f.flight_num, f.dept_airport, f.arr_airport, f.dept_date, f.arr_date FROM flight as f, manage as m WHERE (f.dept_date = %s OR f.dept_date >= %s) and f.dept_date >= %s and f.dept_airport = (SELECT name_airport FROM airport WHERE city = %s or name_airport = %s) and f.arr_airport = (SELECT name_airport FROM airport WHERE city = %s or name_airport=%s) and m.flight_num = f.flight_num and ((m.max_seats - m.total_seats) > 0)'
+		query = 'SELECT f.flight_num, f.dept_airport, f.arr_airport, f.dept_date, f.arr_date FROM flight as f, manage as m WHERE (f.dept_date = %s OR f.dept_date >= %s) and f.dept_date >= %s and f.dept_airport = (SELECT name_airport FROM airport WHERE city = %s or name_airport = %s) and f.arr_airport = (SELECT name_airport FROM airport WHERE city = %s or name_airport=%s) and m.flight_num = f.flight_num and ((m.max_seats - m.total_seats) > 0)'
 		cursor.execute(query, (
 			deptdate,
 			deptdate,
@@ -548,8 +602,6 @@ def confirmCustomerBuy():
 		conn.commit()
 		cur.close()
 		return redirect('/customer/view/myflights')
-
-
 	return redirect('/login/customer')
 
 def get_flight_info(num):
@@ -585,17 +637,6 @@ def staffViewFlights():
 		cursor.close()
 		return render_template('staff-view-flights.html', flight = data, airline_name=air_data)
 
-@app.route('/post', methods=['GET', 'POST'])
-def post():
-	username = session['username']
-	cursor = conn.cursor()
-	blog = request.form['blog']
-	query = 'INSERT INTO blog (blog_post, username) VALUES(%s, %s)'
-	cursor.execute(query, (blog, username))
-	conn.commit()
-	cursor.close()
-	return redirect(url_for('home'))
-	return redirect('/login/staff')
 
 
 @app.route('/staff/reports')
@@ -695,6 +736,13 @@ def addAirplaneAuth():
 		manufact = request.form['manuCompany']
 		age = request.form['age']
 		cursor = conn.cursor()
+		check = 'SELECT * FROM airplane WHERE id_airplane = %s'
+		cursor.execute(check, ID)
+		if cursor.fetchall():
+			error = "Airplane Already Exists"
+			cursor.close()
+			return render_template('staff-errorpage.html', error=error)
+
 		query = 'INSERT INTO `airplane`(`id_airplane`, `airline_name`, `num_of_seats`, `manufacturing_company`, `age`) VALUES (%s,%s,%s,%s,%s)'
 		cursor.execute(query, (
 			ID,
@@ -841,10 +889,7 @@ def viewPreviousFlightsAuth():
 		#query = 'SELECT distinct b.flight_num, avg(b.ratings) as avg_rating, b.comments FROM buys as b, manage as m WHERE m.airline_name = %s and m.flight_num = b.flight_num GROUP BY b.flight_num ,b.comments'
 		cursor.execute(query, (air_name))
 		data = cursor.fetchall()
-		#values = [int(line['avg_rating']) for line in data]  
-		#sumvalues = sum(values)
-		#count_values = len(values)
-		#average = sumvalues/count_values
+		
 		cursor.close()
 		return render_template('pastFlights.html', flight = data, airline_name = air_name)#, average = average)
 
@@ -875,6 +920,32 @@ def viewPreviousFlightsAuth2():
 	
 
 	return redirect('/login/staff')
+
+@app.route('/staff/viewRevenue') 
+def staffviewRevenue():  
+	return render_template('staff-revenue.html') 
+
+@app.route('/staff/viewRevenueAuth',methods=['GET', 'POST']) 
+def staffviewRevenueAuth():  
+	air_data = staff_check_session() 
+	if(air_data):
+		startDate = request.form['startDate']
+		endDate = request.form['endDate']
+		cursor = conn.cursor()  
+		query = 'SELECT sum(sold_price) as total,  MONTH(b.dept_date) as m, YEAR(b.dept_date) as y, b.flight_num FROM buys as b, manage as m WHERE %s <= b.dept_date and b.dept_date < %s and b.flight_num = m.flight_num and m.airline_name = %s group by b.flight_num, m,y'
+		cursor.execute(query,(
+			startDate+ "00:00:00",
+			endDate+ "00:00:00",
+			air_data[0]['airline_name']))
+		data = cursor.fetchall() 		
+		print('-----------------------------',data)
+		values = [int(line['total']) for line in data]  
+		sumvalues = sum(values)
+		values.append(0)		
+		cursor.close()
+		return render_template('staff-revenue.html',total=data,values=values,sumvalues=sumvalues) 
+
+
 
 @app.route('/logout/customer') 
 def logout_customer():

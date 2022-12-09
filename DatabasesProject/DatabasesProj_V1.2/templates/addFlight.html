@@ -11,17 +11,33 @@
         <th> arrival time</th>
         <input type="time" name = "arrtime" placeholder="Arrival Time" required/></br>
         <th> arrival airport</th>
-        <input type="varchar(50)" name = "arrairport" placeholder="Arrival Airport" required/> </br>
+        <select name="arrairport">
+            {% for line in airport %}
+            <option value={{line['name_airport']}}> {{line['name_airport']}}</option>
+            {% endfor %}
+        </select> </br>
         <th> arrival date</th>
         <input type="date" name = "arrdate" placeholder="Arrival Date" required/> </br>
         <th> base price </th>
         <input type="decimal(8,2)" name = "baseprice" placeholder="Base Price" required/> </br>
         <th> Airplane ID </th>
-        <input type="varchar(50)" name = "idairplane" placeholder="Airplane ID" required/> </br>
+        <select name="idairplane">
+            {% for line in airplane %}
+            <option value={{line['id_airplane']}}> {{line['id_airplane']}}</option>
+            {% endfor %}
+        </select> </br>
         <th> Departure Airport </th>
-        <input type="varchar(50)" name = "deptairport" placeholder="Departure Airport" required/> </br>
+        <select name="deptairport">
+            {% for line in airport %}
+            <option value={{line['name_airport']}}> {{line['name_airport']}}</option>
+            {% endfor %}
+        </select> </br>
         <th> stats</th>
-        <input type="varchar(50)" name="states" placeholder="stats" required/> </br>
+        <select name="states" required>
+            <option value="On Time">On Time</option>
+            <option value="Delayed">Delayed</option>
+            <option value="Cancelled">Cancelled</option>
+        </select></br>
         <input type="submit" value = Submit>
         {% if error %}
             <p class="error"><strong>Error:</strong> {{error}}</p>
