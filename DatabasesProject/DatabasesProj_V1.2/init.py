@@ -911,7 +911,7 @@ def viewPreviousFlightsAuth2():
 		sumvalues = sum(values)
 		count_values = len(values)
 		if count_values == 0:
-			average = "No Average Rating"
+			average = "No average rating available for this flight"
 		else:
 			average = sumvalues/count_values
 		
